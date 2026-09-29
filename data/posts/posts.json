@@ -1,0 +1,74 @@
+[
+  {
+    "slug": "the-behavior-of-red-foxes",
+    "title": "The Behavior of Red Foxes",
+    "body": "Red foxes are highly adaptable predators found across forests, grasslands, and increasingly, suburban backyards. Known for their reddish-orange coat, pointed ears, and bushy white-tipped tail, the red fox hunts mostly at dawn and dusk, relying on excellent hearing to locate small rodents burrowing under snow or leaf litter. Unlike wolves, foxes are largely solitary hunters rather than pack animals. A mated pair will raise their kits together in a den, but adult foxes spend most of the year foraging alone across a defined territory.",
+    "category": "fox"
+  },
+  {
+    "slug": "how-foxes-hunt-in-winter",
+    "title": "How Foxes Hunt in Winter",
+    "body": "When snow blankets the ground, a red fox relies on its hearing more than its eyesight to find prey. It can detect the faint rustle of a vole moving beneath a foot of snow, then leap almost vertically to pounce through the crust and pin the rodent underneath. This distinctive 'mousing' behavior, sometimes called the fox pounce, is one of the most recognizable hunting techniques in the animal kingdom and has even been measured to align with the Earth's magnetic field.",
+    "category": "fox"
+  },
+  {
+    "slug": "wolf-pack-social-structure",
+    "title": "Wolf Pack Social Structure",
+    "body": "A wolf pack is typically a family unit built around a breeding pair and their offspring from multiple years. Contrary to the old 'alpha wolf' model built on studies of unrelated captive wolves, wild wolf packs function more like a household: parents lead simply because they are the parents, not because they fought their way to the top. Pack size varies with prey availability — packs hunting elk or bison in open terrain tend to be larger than those hunting deer in dense forest.",
+    "category": "wolf"
+  },
+  {
+    "slug": "why-wolves-howl",
+    "title": "Why Wolves Howl",
+    "body": "Howling is a wolf's long-range communication tool, audible up to ten miles away across open terrain. Packs howl to reassemble after a hunt, to warn rival packs away from a territory boundary, and simply to reinforce social bonds — a chorus howl often breaks out after a reunion or a successful hunt. Each wolf's howl has a distinct pitch and rhythm, and researchers can identify individual animals from a recording alone.",
+    "category": "wolf"
+  },
+  {
+    "slug": "training-a-new-puppy",
+    "title": "Training a New Puppy: The First 30 Days",
+    "body": "The first month with a new puppy sets the tone for years of behavior. Consistency matters more than intensity: five-minute training sessions, repeated several times a day, outperform one long session. Start with a single reliable cue — most trainers recommend 'sit' — before layering on recall, leash manners, and crate training. Positive reinforcement, not correction, builds a dog that wants to work with you rather than one that simply avoids punishment.",
+    "category": "dog"
+  },
+  {
+    "slug": "best-family-dog-breeds",
+    "title": "Choosing a Family-Friendly Dog Breed",
+    "body": "Golden retrievers, Labradors, and beagles consistently top family-friendly breed lists for good reason: they were bred for cooperative work alongside people rather than independent guarding or hunting. Temperament varies more within a breed than between breeds, though, so meeting a specific dog's parents and observing its behavior around children matters more than the breed label on paper.",
+    "category": "dog"
+  },
+  {
+    "slug": "bear-hibernation-explained",
+    "title": "Bear Hibernation, Explained",
+    "body": "A hibernating bear's body temperature drops only a few degrees, but its heart rate falls from around 50 beats per minute to as low as 8, and it can go the entire winter without eating, drinking, or eliminating waste. Bears spend late summer and fall in a state called hyperphagia, consuming up to 20,000 calories a day to build the fat reserves that will carry them through months of dormancy in a den.",
+    "category": "bear"
+  },
+  {
+    "slug": "grizzly-vs-black-bear",
+    "title": "Grizzly Bear vs. Black Bear: Telling Them Apart",
+    "body": "The most reliable way to distinguish a grizzly from a black bear isn't color — both species range from blond to black. Look instead at the shoulder hump (grizzlies have one, black bears don't), the face profile (grizzlies have a concave, dish-shaped face; black bears a straighter Roman nose), and claw length, which is far more pronounced on a grizzly's front paws for digging roots and excavating dens.",
+    "category": "bear"
+  },
+  {
+    "slug": "deer-mating-season-rut",
+    "title": "The Deer Rut: What Happens During Mating Season",
+    "body": "Each autumn, rising testosterone drives male deer into the rut, a weeks-long period of heightened aggression, reduced feeding, and constant movement in search of receptive does. Bucks spar with their antlers, rub trees to mark territory, and travel far more than usual, which is why deer-vehicle collisions spike sharply in October and November across much of North America.",
+    "category": "deer"
+  },
+  {
+    "slug": "how-deer-evade-predators",
+    "title": "How Deer Evade Predators",
+    "body": "A whitetail deer's primary defense is early detection: large, mobile ears and a wide field of vision let it notice a approaching predator well before the predator notices it. When it does flee, a deer will often stot — a stiff-legged bounding gait — partly to clear obstacles and partly, researchers believe, as a signal to the predator that it's been seen and a chase isn't worth the energy.",
+    "category": "deer"
+  },
+  {
+    "slug": "home-coffee-brewing-guide",
+    "title": "A Beginner's Guide to Home Coffee Brewing",
+    "body": "Good coffee at home starts with the grind, not the machine. A burr grinder set just coarser than table salt suits a standard drip brewer, while a pour-over wants a slightly finer, more consistent grind to control extraction time. Water temperature matters too: aim for just off the boil, around 195-205°F, since fully boiling water can scorch the grounds and pull out bitter compounds.",
+    "category": "none"
+  },
+  {
+    "slug": "intro-to-version-control",
+    "title": "An Introduction to Version Control with Git",
+    "body": "Version control lets a team track every change to a codebase, attribute it to an author, and roll it back if something breaks. Git, the dominant tool today, stores snapshots rather than diffs internally, which is part of why branching and merging are so cheap compared to older systems. A typical workflow starts with a feature branch, moves through a series of small commits, and ends with a pull request for review before merging back into the main line.",
+    "category": "none"
+  }
+]

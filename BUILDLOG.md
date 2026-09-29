@@ -1,0 +1,32 @@
+# Build log
+
+Honest AI-usage log, per the brief's rule: "keep BUILDLOG.md honest: where AI helped, where it was wrong, what you changed."
+
+## How this was built
+
+Built with Claude as the pair-programmer, working directly against this brief's Section 6 contract. Design doc first (Phase 1 gate), then the vision pipeline, then the matching engine and guard, then the review API and eval — in the order Section 8 lays out, each phase checked against a concrete gate before moving on.
+
+## A real environment constraint, worked around transparently
+
+The cloud sandbox this was built in has a locked-down network — an organization egress policy that allows only a short list of package registries (npm, PyPI, etc.) and blocks everything else, including Unsplash/Pexels (for the image corpus) and Gemini's own API. This isn't a workaround-able restriction (the proxy's own diagnostics say plainly: "do not retry or route around it — report the blocked host"), so:
+
+- **The image corpus was supplied by the user directly** rather than fetched by the agent — see the "Where AI helped" / limitations sections below for how the manifest and licensing were handled.
+- **The real Gemini vision/embedding calls were run from the user's own machine** (normal internet access), not from the sandbox. The application code itself has no knowledge of this — it just calls `GEMINI_API_KEY` against the real API — the constraint only affected *where* the ingest/embed batch jobs were physically executed during development, not how they're written. A stranger cloning this repo on a normal machine runs it exactly as documented in the README, no workaround needed.
+
+## Where AI helped
+
+- Structuring the vision call around Gemini's `response_schema` (structured output) so the model is forced into `VisionTags`' exact JSON shape at the API level, on top of Pydantic re-validating it — belt and suspenders, since "never trust invalid model output" is the brief's own explicit instruction.
+- The mismatch guard's three-check design (category sanity, confidence floor, similarity threshold) and making every verdict carry a human-readable reason instead of a bare boolean.
+- The deterministic mock-mode design (`MOCK_AI=1`) for both vision and embeddings — not just stub returns, but ones built to preserve *relative* similarity by animal category, so the guard/ranking logic could be genuinely exercised and verified without spending real API quota on every iteration.
+- Factoring the "rank candidates -> walk through the guard -> pick a winner" logic out of the API route and into `app/lib/matching.py`, so the standalone eval script (`scripts/eval.py`) measures the exact same code path the live API runs — a precision number computed against a reimplementation wouldn't mean anything.
+
+## Where it was wrong, and what I changed
+
+- **A real SQLite self-deadlock, caught during the very first end-to-end test run, not code review.** The batch job's per-image loop opened a `with db()` connection to write the image's result, and *inside* that still-open block called `_bump_job()` — which opens its *own* `with db()` connection to update progress. Two connections to the same file in one thread, one holding an uncommitted write while the other waits for it, with neither able to proceed: a straightforward self-deadlock. It didn't error immediately because a `busy_timeout` was set — it just hung silently for the full timeout instead. Fixed by restructuring both `run_vision_ingest_job` and `run_embed_job` so every DB-touching call is fully sequential — no function that opens its own connection is ever called from inside another already-open connection's `with` block. Documented as a standing rule in `app/jobs.py`'s module docstring so it doesn't get reintroduced later.
+- **The mismatch guard's category check had a real blind spot, caught by the brief's own example.** Testing "force the wolf as a candidate for the fox post" (Probe 3) against the seed post *"The Behavior of Red Foxes"* returned a rejection for the wrong reason — "similarity below threshold" instead of the expected "category mismatch." The post's own body text includes the sentence *"Unlike wolves, foxes are largely solitary hunters..."* — a completely ordinary piece of writing that nonetheless meant a naive keyword scan over the full post body saw "wolf" as one of the post's own expected categories, right alongside "fox," which meant the wolf candidate looked like an *expected* category to the guard rather than a conflicting one. Fixed by scoping the category-sanity check to the post's **title** only (`app/lib/guard.py`'s `expected_categories()`) — a title is a much more reliable signal of what a post is actually about than a full body, which routinely makes incidental comparisons to other subjects in normal prose.
+- **A field-naming bug produced a suspiciously perfect-looking 16.7% precision score, not the real one.** The eval script's precision table was comparing the wrong data — `app/lib/matching.py` was reading the vision model's own broad-category output (`images.category`, e.g. `"animal"` for literally every image) into a dict key named `true_category`, instead of the actual ground-truth label column (`images.true_category`, e.g. `"fox"` / `"wolf"`) — which the underlying SQL query wasn't even selecting. Every post scored "WRONG" except the two off-topic ones that don't depend on category matching at all, which is what made the bug visible rather than silently wrong: a precision number that low on an otherwise-working pipeline was worth stopping and checking rather than writing off as "the model just isn't that good." Fixed by selecting `i.true_category` explicitly and fixing the dict key mapping in `load_ranked_candidates()`.
+
+## What I'd explain if asked about any 2-3 lines
+
+- `app/lib/embeddings.py`'s mock embedder is a small bag-of-keywords vector (one dimension per known animal category, plus a low-magnitude deterministic hash tail for uniqueness) rather than random noise — the whole point of mock mode is to exercise the *real* ranking and guard logic without a live API call, and random vectors would make every similarity score meaningless.
+- `app/lib/guard.py`'s `_image_category()` matches an image's tagged subject *or* broad category against the same keyword table used for the post-side check, so a vision response of `subject: "gray wolf"` and one of `subject: "timber wolf"` are both recognized as the `wolf` category without hardcoding every possible phrasing the model might use.
