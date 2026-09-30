@@ -83,9 +83,20 @@ def run_vision_ingest_job(job_id: int):
                 last_error = str(e)
                 log_cost("vision", PROVIDER, GEMINI_VISION_MODEL, "image", image_id, success=False)
                 if not MOCK_AI:
-                    time.sleep(min(2 ** attempt, 8))  # backoff between retries on real calls
+                    # 429 (quota) and 503 (overloaded) need real recovery time, not a
+                    # quick backoff — a free-tier RPM limit doesn't clear in 8 seconds.
+                    is_rate_limited = "429" in last_error or "503" in last_error
+                    time.sleep(min(15 * attempt, 45) if is_rate_limited else min(2 ** attempt, 8))
+
+        # Flat pacing between every image (success or not), real calls only — this is
+        # what actually keeps the run under the free-tier requests-per-minute cap.
+        # Without it, the loop bursts through ~15 calls in seconds and then spends the
+        # rest of the run recovering from 429s one slow retry at a time.
+        if not MOCK_AI:
+            time.sleep(4)
 
         if tags is not None:
+            print(f"[vision] {filename}: {tags.subject!r} (confidence {tags.confidence:.2f})")
             low_conf = 1 if tags.confidence < MIN_CONFIDENCE else 0
             with db() as conn:
                 conn.execute(
@@ -100,6 +111,7 @@ def run_vision_ingest_job(job_id: int):
             _bump_job(job_id, processed_delta=1)
         else:
             # Every retry failed: quarantined, never silently accepted.
+            print(f"[vision] giving up on {filename}: {last_error}")
             with db() as conn:
                 conn.execute(
                     "UPDATE images SET status='failed', error=?, attempts=?, processed_at=? WHERE id=?",
@@ -134,7 +146,8 @@ def run_embed_job(job_id: int):
                 last_error = str(e)
                 log_cost("embedding", PROVIDER, GEMINI_EMBEDDING_MODEL, "image", image_id, success=False)
                 if not MOCK_AI:
-                    time.sleep(min(2 ** attempt, 8))
+                    is_rate_limited = "429" in last_error or "503" in last_error
+                    time.sleep(min(15 * attempt, 45) if is_rate_limited else min(2 ** attempt, 8))
 
         if vector is not None:
             with db() as conn:
@@ -146,6 +159,9 @@ def run_embed_job(job_id: int):
         else:
             _bump_job(job_id, processed_delta=1, failed_delta=1)
             print(f"[embed] giving up on image {image_id}: {last_error}")
+
+        if not MOCK_AI:
+            time.sleep(2)
 
     for row in posts:
         post_id, title, body = row["id"], row["title"], row["body"]
@@ -161,7 +177,8 @@ def run_embed_job(job_id: int):
                 last_error = str(e)
                 log_cost("embedding", PROVIDER, GEMINI_EMBEDDING_MODEL, "post", post_id, success=False)
                 if not MOCK_AI:
-                    time.sleep(min(2 ** attempt, 8))
+                    is_rate_limited = "429" in last_error or "503" in last_error
+                    time.sleep(min(15 * attempt, 45) if is_rate_limited else min(2 ** attempt, 8))
 
         if vector is not None:
             with db() as conn:
@@ -173,5 +190,8 @@ def run_embed_job(job_id: int):
         else:
             _bump_job(job_id, processed_delta=1, failed_delta=1)
             print(f"[embed] giving up on post {post_id}: {last_error}")
+
+        if not MOCK_AI:
+            time.sleep(2)
 
     _bump_job(job_id, finish=True)

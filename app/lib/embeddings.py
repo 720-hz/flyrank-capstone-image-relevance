@@ -57,7 +57,11 @@ def embed_text(text: str) -> list[float]:
         raise EmbeddingCallError("GEMINI_API_KEY is not set — cannot make a real embedding call.")
 
     url = GEMINI_EMBED_URL.format(model=GEMINI_EMBEDDING_MODEL)
-    body = {"content": {"parts": [{"text": text}]}}
+    # taskType is optional but Google's own docs recommend setting it;
+    # SEMANTIC_SIMILARITY matches exactly what this app does with the
+    # result — cosine-comparing a post's embedding against an image
+    # caption's embedding.
+    body = {"content": {"parts": [{"text": text}]}, "taskType": "SEMANTIC_SIMILARITY"}
     try:
         resp = httpx.post(url, params={"key": GEMINI_API_KEY}, json=body, timeout=30)
     except httpx.HTTPError as e:
@@ -68,6 +72,13 @@ def embed_text(text: str) -> list[float]:
 
     try:
         data = resp.json()
+        # Current API returns {"embeddings": [{"values": [...]}]} (plural,
+        # list) — the older text-embedding-004 API returned a singular
+        # {"embedding": {"values": [...]}}, which is what this used to
+        # parse before that model was retired. Handle both shapes so this
+        # keeps working if the response format shifts again.
+        if "embeddings" in data:
+            return data["embeddings"][0]["values"]
         return data["embedding"]["values"]
-    except (KeyError, TypeError) as e:
+    except (KeyError, IndexError, TypeError) as e:
         raise EmbeddingCallError(f"could not extract embedding from response: {e}") from e
