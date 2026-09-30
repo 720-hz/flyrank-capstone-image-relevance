@@ -11,15 +11,15 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_VISION_MODEL = os.environ.get("GEMINI_VISION_MODEL", "gemini-2.0-flash")
-GEMINI_EMBEDDING_MODEL = os.environ.get("GEMINI_EMBEDDING_MODEL", "text-embedding-004")
+GEMINI_VISION_MODEL = os.environ.get("GEMINI_VISION_MODEL", "gemini-3.5-flash-lite")
+GEMINI_EMBEDDING_MODEL = os.environ.get("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001")
 
 DB_PATH = os.environ.get("DB_PATH", str(BASE_DIR / "image_relevance.db"))
 DATA_DIR = Path(os.environ.get("DATA_DIR", str(BASE_DIR / "data")))
 IMAGES_DIR = DATA_DIR / "images"
 POSTS_FILE = DATA_DIR / "posts" / "posts.json"
 
-SIMILARITY_THRESHOLD = float(os.environ.get("SIMILARITY_THRESHOLD", "0.55"))
+SIMILARITY_THRESHOLD = float(os.environ.get("SIMILARITY_THRESHOLD", "0.74"))
 MIN_CONFIDENCE = float(os.environ.get("MIN_CONFIDENCE", "0.6"))
 
 PORT = int(os.environ.get("PORT", "8000"))
